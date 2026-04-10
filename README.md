@@ -13,7 +13,9 @@ Base URL: http://localhost:5000/api
 ### 2. Gacha History
 
 1. GET /gacha/history/:userId - melihat histori gacha dari user tertentu.
-2. Response:
+2. Headers:
+   x-user-id: userId
+3. Response:
    [ { "status": "WIN", "prizeName": "Pulsa Rp50.000", "createdAt": "2026-04-10T10:00:00Z" }, { "status": "LOSE", "prizeName": null, "createdAt": "2026-04-10T09:55:00Z" } ]
 
 ## Prize Endpoints
