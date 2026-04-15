@@ -37,12 +37,6 @@ Base URL: http://localhost:5000/api
    "token": "jwt_token_here"
    }
 
-### Protected Test Route
-
-1. GET /auth/protected
-2. Headers:
-   Authorization: Bearer <token>
-
 ## Gacha Endpoints
 
 ### 1. Play Gacha
