@@ -38,12 +38,4 @@ async function register(request, response, next) {
   }
 }
 
-async function testProtected(request, response, next) {
-  try {
-    return response.status(200).json({ message: 'OK' });
-  } catch (error) {
-    return next(error);
-  }
-}
-
-module.exports = { login, testProtected, register };
+module.exports = { login, register };

@@ -4,4 +4,8 @@ async function getUserByEmail(email) {
   return Users.findOne({ email });
 }
 
-module.exports = { getUserByEmail };
+async function createUser(data) {
+  return Users.create(data);
+}
+
+module.exports = { getUserByEmail, createUser };

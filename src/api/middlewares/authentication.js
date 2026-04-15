@@ -2,10 +2,14 @@ const passport = require('passport');
 const passportJWT = require('passport-jwt');
 const { Users } = require('../../models');
 
+const { ExtractJwt } = passportJWT;
+const JwtStrategy = passportJWT.Strategy;
+
 passport.use(
-  new passportJWT.Strategy(
+  new JwtStrategy(
     {
-      jwtFromRequest: passportJWT.ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: process.env.JWT_SECRET, // ❗ INI WAJIB
     },
     async (payload, done) => {
       const user = await Users.findOne({ email: payload.email });

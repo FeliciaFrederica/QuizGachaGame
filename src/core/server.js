@@ -3,6 +3,7 @@ const cors = require('cors');
 const express = require('express');
 const pinoHTTP = require('pino-http');
 
+const methodOverride = require('method-override');
 const config = require('./config');
 const logger = require('./logger')('app');
 const routes = require('../api/routes');
@@ -18,7 +19,7 @@ app.enable('trust proxy');
 app.use(cors());
 
 // Let you use HTTP verbs such as PUT or DELETE in places where the client doesn't support it
-app.use(require('method-override')());
+app.use(methodOverride());
 
 // Middleware that transforms the raw string of request.body into JSON
 app.use(bodyParser.json());
