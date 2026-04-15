@@ -1,11 +1,11 @@
 const { Users } = require('../../../models');
 
 async function getUsers() {
-  return Users.find({});
+  return Users.find({}, '-password');
 }
 
 async function getUser(id) {
-  return Users.findById(id);
+  return Users.findById(id).select('-password');
 }
 
 async function getUserByEmail(email) {

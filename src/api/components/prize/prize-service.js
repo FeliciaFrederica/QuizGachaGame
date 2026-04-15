@@ -5,6 +5,14 @@ async function getAvailablePrizes() {
 }
 
 async function createPrize(name, quota) {
+  if (!name) {
+    throw new Error('Prize name is required');
+  }
+
+  if (typeof quota !== 'number' || quota < 0) {
+    throw new Error('Invalid quota');
+  }
+
   return prizeRepository.createPrize({
     name,
     quota,

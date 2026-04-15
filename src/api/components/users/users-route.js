@@ -1,5 +1,7 @@
 const express = require('express');
 
+const userAuth = require('../../middlewares/user-middleware');
+const adminOnly = require('../../middlewares/admin-middleware');
 const usersController = require('./users-controller');
 
 const route = express.Router();
@@ -7,21 +9,21 @@ const route = express.Router();
 module.exports = (app) => {
   app.use('/users', route);
 
-  // Get list of users
-  route.get('/', usersController.getUsers);
+  // Get all users (admin)
+  route.get('/', userAuth, adminOnly, usersController.getUsers);
 
-  // Create a new user
+  // Create a new user, register
   route.post('/', usersController.createUser);
 
   // Get user detail
-  route.get('/:id', usersController.getUser);
+  route.get('/me', userAuth, usersController.getUser);
 
   // Update user
-  route.put('/:id', usersController.updateUser);
+  route.put('/me', userAuth, usersController.updateUser);
 
   // Change password
-  route.put('/:id/change-password', usersController.changePassword);
+  route.put('/me/change-password', userAuth, usersController.changePassword);
 
-  // Delete user
-  route.delete('/:id', usersController.deleteUser);
+  // Delete user (admin)
+  route.delete('/:id', userAuth, adminOnly, usersController.deleteUser);
 };

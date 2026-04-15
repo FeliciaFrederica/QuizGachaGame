@@ -3,7 +3,7 @@ const gachaService = require('./gacha-service');
 async function playGacha(request, response, next) {
   try {
     // ambil userId
-    const { userId } = request.body;
+    const { userId } = request.user.id;
 
     const result = await gachaService.playGacha(userId);
 
@@ -15,13 +15,7 @@ async function playGacha(request, response, next) {
 
 async function getHistory(req, res, next) {
   try {
-    const { userId } = req.params;
-
-    if (userId !== req.user?.id) {
-      return res.status(403).json({
-        message: 'Forbidden',
-      });
-    }
+    const { userId } = req.user.id;
 
     const history = await gachaService.getGachaHistory(userId);
 

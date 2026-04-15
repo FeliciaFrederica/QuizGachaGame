@@ -2,7 +2,7 @@ const { Prize } = require('../../../models');
 
 async function getAvailablePrizes() {
   return Prize.find({ remainingQuota: { $gt: 0 } }).select(
-    ' name remainingQuota -_id '
+    'name remainingQuota -_id'
   );
 }
 
@@ -15,7 +15,10 @@ async function getAllPrizes() {
 }
 
 async function decreaseQuota(id) {
-  return Prize.updateOne({ _id: id }, { $inc: { remainingQuota: -1 } });
+  return Prize.updateOne(
+    { _id: id, remainingQuota: { $gt: 0 } },
+    { $inc: { remainingQuota: -1 } }
+  );
 }
 
 module.exports = {

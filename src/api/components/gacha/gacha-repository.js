@@ -14,8 +14,12 @@ async function countGachaToday(userId, startOfDay, endOfDay) {
   });
 }
 
-async function getGachaHistoryByUser(userId) {
-  return Gacha.find({ userId }).sort({ createdAt: -1 });
+async function getGachaHistoryByUser(userId, limit = 20, skip = 0) {
+  return Gacha.find({ userId })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .lean();
 }
 
 module.exports = {

@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const { env, port } = require('./core/config');
 const logger = require('./core/logger')('app');
 const server = require('./core/server');

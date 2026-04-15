@@ -55,15 +55,16 @@ async function playGacha(userId) {
     const filteredRarity = rarityTable.filter((r) =>
       availableNames.includes(r.name)
     );
+    if (filteredRarity.length > 0) {
+      const selectedName = getRandomPrizeByChance(filteredRarity);
+      const selected = prizes.find((p) => p.name === selectedName);
 
-    const selectedName = getRandomPrizeByChance(filteredRarity);
-    const selected = prizes.find((p) => p.name === selectedName);
+      if (selected && selected.remainingQuota > 0) {
+        status = 'WIN';
+        prizeName = selected.name;
 
-    if (selected && selected.remainingQuota > 0) {
-      status = 'WIN';
-      prizeName = selected.name;
-
-      await prizeRepository.decreaseQuota(selected.id);
+        await prizeRepository.decreaseQuota(selected.id);
+      }
     }
   }
 

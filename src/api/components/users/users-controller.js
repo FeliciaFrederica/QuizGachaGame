@@ -1,11 +1,15 @@
 const usersService = require('./users-service');
 const { errorResponder, errorTypes } = require('../../../core/errors');
-const { hashPassword } = require('../../../utils/password');
+const { hashPassword, passwordMatched } = require('../../../utils/password');
 
 async function getUsers(request, response, next) {
   try {
-    const users = await usersService.getUsers();
+    // ❗ hanya admin
+    if (request.user.role !== 'admin') {
+      throw errorResponder(errorTypes.FORBIDDEN, 'Forbidden');
+    }
 
+    const users = await usersService.getUsers();
     return response.status(200).json(users);
   } catch (error) {
     return next(error);
@@ -14,7 +18,13 @@ async function getUsers(request, response, next) {
 
 async function getUser(request, response, next) {
   try {
-    const user = await usersService.getUser(request.params.id);
+    const targetUserId = request.params.id;
+
+    if (request.user.id !== targetUserId && request.user.role !== 'admin') {
+      throw errorResponder(errorTypes.FORBIDDEN, 'Forbidden');
+    }
+
+    const user = await usersService.getUser(targetUserId);
 
     if (!user) {
       throw errorResponder(errorTypes.UNPROCESSABLE_ENTITY, 'User not found');
@@ -35,12 +45,10 @@ async function createUser(request, response, next) {
       confirm_password: confirmPassword,
     } = request.body;
 
-    // Email is required and cannot be empty
     if (!email) {
       throw errorResponder(errorTypes.VALIDATION_ERROR, 'Email is required');
     }
 
-    // Full name is required and cannot be empty
     if (!fullName) {
       throw errorResponder(
         errorTypes.VALIDATION_ERROR,
@@ -48,7 +56,6 @@ async function createUser(request, response, next) {
       );
     }
 
-    // Email must be unique
     if (await usersService.emailExists(email)) {
       throw errorResponder(
         errorTypes.EMAIL_ALREADY_TAKEN,
@@ -56,7 +63,6 @@ async function createUser(request, response, next) {
       );
     }
 
-    // The password is at least 8 characters long
     if (password.length < 8) {
       throw errorResponder(
         errorTypes.VALIDATION_ERROR,
@@ -64,7 +70,6 @@ async function createUser(request, response, next) {
       );
     }
 
-    // The password and confirm password must match
     if (password !== confirmPassword) {
       throw errorResponder(
         errorTypes.VALIDATION_ERROR,
@@ -72,10 +77,8 @@ async function createUser(request, response, next) {
       );
     }
 
-    // Hash the password before saving it to the database
     const hashedPassword = await hashPassword(password);
 
-    // Create the user
     const success = await usersService.createUser(
       email,
       hashedPassword,
@@ -97,20 +100,23 @@ async function createUser(request, response, next) {
 
 async function updateUser(request, response, next) {
   try {
+    const targetUserId = request.params.id;
+
+    if (request.user.id !== targetUserId && request.user.role !== 'admin') {
+      throw errorResponder(errorTypes.FORBIDDEN, 'Forbidden');
+    }
+
     const { email, full_name: fullName } = request.body;
 
-    // User must exist
-    const user = await usersService.getUser(request.params.id);
+    const user = await usersService.getUser(targetUserId);
     if (!user) {
       throw errorResponder(errorTypes.UNPROCESSABLE_ENTITY, 'User not found');
     }
 
-    // Email is required and cannot be empty
     if (!email) {
       throw errorResponder(errorTypes.VALIDATION_ERROR, 'Email is required');
     }
 
-    // Full name is required and cannot be empty
     if (!fullName) {
       throw errorResponder(
         errorTypes.VALIDATION_ERROR,
@@ -118,7 +124,6 @@ async function updateUser(request, response, next) {
       );
     }
 
-    // Email must be unique, if it is changed
     if (email !== user.email && (await usersService.emailExists(email))) {
       throw errorResponder(
         errorTypes.EMAIL_ALREADY_TAKEN,
@@ -127,7 +132,7 @@ async function updateUser(request, response, next) {
     }
 
     const success = await usersService.updateUser(
-      request.params.id,
+      targetUserId,
       email,
       fullName
     );
@@ -146,36 +151,79 @@ async function updateUser(request, response, next) {
 }
 
 async function changePassword(request, response, next) {
-  // TODO: Implement this function
-  // const id = request.params.id;
-  // const {
-  //   old_password: oldPassword,
-  //   new_password: newPassword,
-  //   confirm_new_password: confirmNewPassword,
-  // } = request.body;
-  //
-  // Make sure that:
-  // - the user exists by checking the user ID
-  // - the old password is correct
-  // - the new password is at least 8 characters long
-  // - the new password is different from the old password
-  // - the new password and confirm new password match
-  //
-  // Note that the password is hashed in the database, so you need to
-  // compare the hashed password with the old password. Use the passwordMatched
-  // function from src/utils/password.js to compare the old password with the
-  // hashed password.
-  //
-  // If any of the conditions above is not met, return an error response
-  // with the appropriate status code and message.
-  //
-  // If all conditions are met, update the user's password and return
-  // a success response.
-  return next(errorResponder(errorTypes.NOT_IMPLEMENTED));
+  try {
+    const targetUserId = request.params.id;
+
+    if (request.user.id !== targetUserId && request.user.role !== 'admin') {
+      throw errorResponder(errorTypes.FORBIDDEN, 'Forbidden');
+    }
+
+    const {
+      old_password: oldPassword,
+      new_password: newPassword,
+      confirm_new_password: confirmNewPassword,
+    } = request.body;
+
+    const user = await usersService.getUser(targetUserId);
+    if (!user) {
+      throw errorResponder(errorTypes.UNPROCESSABLE_ENTITY, 'User not found');
+    }
+
+    // cek old password
+    if (!(await passwordMatched(oldPassword, user.password))) {
+      throw errorResponder(errorTypes.INVALID_CREDENTIALS, 'Wrong password');
+    }
+
+    if (newPassword.length < 8) {
+      throw errorResponder(
+        errorTypes.VALIDATION_ERROR,
+        'Password must be at least 8 characters long'
+      );
+    }
+
+    if (newPassword === oldPassword) {
+      throw errorResponder(
+        errorTypes.VALIDATION_ERROR,
+        'New password must be different'
+      );
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      throw errorResponder(
+        errorTypes.VALIDATION_ERROR,
+        'Password confirmation does not match'
+      );
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+
+    const success = await usersService.changePassword(
+      targetUserId,
+      hashedPassword
+    );
+
+    if (!success) {
+      throw errorResponder(
+        errorTypes.UNPROCESSABLE_ENTITY,
+        'Failed to change password'
+      );
+    }
+
+    return response
+      .status(200)
+      .json({ message: 'Password updated successfully' });
+  } catch (error) {
+    return next(error);
+  }
 }
 
 async function deleteUser(request, response, next) {
   try {
+    // ❗ admin only
+    if (request.user.role !== 'admin') {
+      throw errorResponder(errorTypes.FORBIDDEN, 'Forbidden');
+    }
+
     const success = await usersService.deleteUser(request.params.id);
 
     if (!success) {
