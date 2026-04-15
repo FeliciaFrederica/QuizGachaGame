@@ -7,7 +7,7 @@ function userAuth(req, res, next) {
     });
   }
 
-  req.user = { id: userId }; // 🔥 isi req.user
+  req.user = { id: userId };
 
   return next();
 }
