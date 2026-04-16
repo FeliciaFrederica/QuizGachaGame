@@ -8,13 +8,13 @@ async function getUser(id) {
   return usersRepository.getUser(id);
 }
 
+async function getUserWithPass(id) {
+  return usersRepository.getUserWithPass(id);
+}
+
 async function emailExists(email) {
   const user = await usersRepository.getUserByEmail(email);
   return !!user;
-}
-
-async function createUser(email, password, fullName) {
-  return usersRepository.createUser(email, password, fullName);
 }
 
 async function updateUser(id, email, fullName) {
@@ -33,7 +33,7 @@ module.exports = {
   getUsers,
   getUser,
   emailExists,
-  createUser,
+  getUserWithPass,
   updateUser,
   changePassword,
   deleteUser,

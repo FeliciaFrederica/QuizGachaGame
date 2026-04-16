@@ -70,44 +70,45 @@ Base URL: http://localhost:5000/api
 2. Response:
    [ { "name": "Emas 10 gram", "remainingQuota": 0 }, { "name": "Smartphone X", "remainingQuota": 4 } ]
 
-### 3. Create Prize (Admin Only)
-
-1. POST /prize - menambahkan hadiah baru (hanya dapat diakses oleh admin).
-2. Headers:
-   Authorization: Bearer <token (admin)>
-3. Request Body:
-   { "name": "Laptop", "quota": 10 }
-4. Response:
-   { "name": "Laptop", "quota": 10, "remainingQuota": 10 }
-
 ## User Endpoints
 
 ### 1. All Users (Admin Only)
 
-1. GET /users - menampilkan daftar semua user
+1. GET /users - menampilkan daftar semua user.
 2. Headers:
    Authorization: Bearer <token (admin)>
 
-### 2. Create User
+### 2. Get User Detail
 
-1. POST /users - membuat user baru.
-2. Request Body:
-   { "email": "user@mail.com", "password": "123456", "fullName": "Felicia", "confirmPassword": "123456" }
-
-### 3. Get User Detail
-
-1. GET /users/me - menampilkan detail user berdasarkan ID.
+1. GET /users/me - menampilkan detail user.
 2. Headers:
    Authorization: Bearer <token>
 
-### 4. Update User
+### 2. Update User
 
-1. PUT /users/me - mengupdate data user.
+1. PUT /users/me - mengupdate data email dan fullname user yang sedang login.
+2. Headers:
+   Authorization: Bearer <token>
+3. Body:
+   {
+   "email": "example@mail.com",
+   "fullName": "New Name"
+   }
 
-### 5. Change Password
+### 3. Change Password
 
 1. PUT /users/me/change-password - mengubah password user.
+2. Headers:
+   Authorization: Bearer <token>
+3. Body:
+   {
+   "old_password": "passwordlama",
+   "new_password": "passwordbaru123",
+   "confirm_new_password": "passwordbaru123"
+   }
 
-### 6. Delete User (admin only)
+### 4. Delete User (admin only)
 
 1. DELETE /users/:id - menghapus user.
+2. Headers:
+   Authorization: Bearer <token>

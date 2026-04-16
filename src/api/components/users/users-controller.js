@@ -4,7 +4,6 @@ const { hashPassword, passwordMatched } = require('../../../utils/password');
 
 async function getUsers(request, response, next) {
   try {
-    // ❗ hanya admin
     if (request.user.role !== 'admin') {
       throw errorResponder(errorTypes.FORBIDDEN, 'Forbidden');
     }
@@ -18,13 +17,7 @@ async function getUsers(request, response, next) {
 
 async function getUser(request, response, next) {
   try {
-    const targetUserId = request.params.id;
-
-    if (request.user.id !== targetUserId && request.user.role !== 'admin') {
-      throw errorResponder(errorTypes.FORBIDDEN, 'Forbidden');
-    }
-
-    const user = await usersService.getUser(targetUserId);
+    const user = await usersService.getUser(request.user.id);
 
     if (!user) {
       throw errorResponder(errorTypes.UNPROCESSABLE_ENTITY, 'User not found');
@@ -100,15 +93,11 @@ async function createUser(request, response, next) {
 
 async function updateUser(request, response, next) {
   try {
-    const targetUserId = request.params.id;
+    const userId = request.user.id;
 
-    if (request.user.id !== targetUserId && request.user.role !== 'admin') {
-      throw errorResponder(errorTypes.FORBIDDEN, 'Forbidden');
-    }
+    const { email, fullName } = request.body;
 
-    const { email, full_name: fullName } = request.body;
-
-    const user = await usersService.getUser(targetUserId);
+    const user = await usersService.getUser(userId);
     if (!user) {
       throw errorResponder(errorTypes.UNPROCESSABLE_ENTITY, 'User not found');
     }
@@ -131,11 +120,7 @@ async function updateUser(request, response, next) {
       );
     }
 
-    const success = await usersService.updateUser(
-      targetUserId,
-      email,
-      fullName
-    );
+    const success = await usersService.updateUser(userId, email, fullName);
 
     if (!success) {
       throw errorResponder(
@@ -152,11 +137,7 @@ async function updateUser(request, response, next) {
 
 async function changePassword(request, response, next) {
   try {
-    const targetUserId = request.params.id;
-
-    if (request.user.id !== targetUserId && request.user.role !== 'admin') {
-      throw errorResponder(errorTypes.FORBIDDEN, 'Forbidden');
-    }
+    const userId = request.user.id;
 
     const {
       old_password: oldPassword,
@@ -164,7 +145,7 @@ async function changePassword(request, response, next) {
       confirm_new_password: confirmNewPassword,
     } = request.body;
 
-    const user = await usersService.getUser(targetUserId);
+    const user = await usersService.getUserWithPass(userId);
     if (!user) {
       throw errorResponder(errorTypes.UNPROCESSABLE_ENTITY, 'User not found');
     }
@@ -197,10 +178,7 @@ async function changePassword(request, response, next) {
 
     const hashedPassword = await hashPassword(newPassword);
 
-    const success = await usersService.changePassword(
-      targetUserId,
-      hashedPassword
-    );
+    const success = await usersService.changePassword(userId, hashedPassword);
 
     if (!success) {
       throw errorResponder(
@@ -219,7 +197,6 @@ async function changePassword(request, response, next) {
 
 async function deleteUser(request, response, next) {
   try {
-    // ❗ admin only
     if (request.user.role !== 'admin') {
       throw errorResponder(errorTypes.FORBIDDEN, 'Forbidden');
     }

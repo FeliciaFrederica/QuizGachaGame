@@ -1,9 +1,15 @@
+const mongoose = require('mongoose');
+
 module.exports = (db) =>
   db.model(
     'Gacha',
     db.Schema(
       {
-        userId: String,
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+        },
 
         prizeName: {
           type: String,

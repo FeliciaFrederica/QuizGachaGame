@@ -12,9 +12,6 @@ module.exports = (app) => {
   // Get all users (admin)
   route.get('/', userAuth, adminOnly, usersController.getUsers);
 
-  // Create a new user, register
-  route.post('/', usersController.createUser);
-
   // Get user detail
   route.get('/me', userAuth, usersController.getUser);
 

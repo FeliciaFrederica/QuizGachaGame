@@ -12,8 +12,8 @@ async function getUserByEmail(email) {
   return Users.findOne({ email });
 }
 
-async function createUser(email, password, fullName) {
-  return Users.create({ email, password, fullName });
+async function getUserWithPass(id) {
+  return Users.findById(id).select('email password fullName');
 }
 
 async function updateUser(id, email, fullName) {
@@ -32,7 +32,7 @@ module.exports = {
   getUsers,
   getUser,
   getUserByEmail,
-  createUser,
+  getUserWithPass,
   updateUser,
   changePassword,
   deleteUser,

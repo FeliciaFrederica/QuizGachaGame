@@ -6,10 +6,6 @@ async function getAvailablePrizes() {
   );
 }
 
-async function createPrize(data) {
-  return Prize.create(data);
-}
-
 async function getAllPrizes() {
   return Prize.find().select('name remainingQuota -_id');
 }
@@ -23,7 +19,6 @@ async function decreaseQuota(id) {
 
 module.exports = {
   getAvailablePrizes,
-  createPrize,
   getAllPrizes,
   decreaseQuota,
 };
